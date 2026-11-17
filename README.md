@@ -1,70 +1,71 @@
-# 🛩️ 레이더에 뭔가 잡혔다! 전투기를 띄워야 할까?
+# 🛩️ Something Appeared on Radar! Should We Scramble the Jets?
 
-공군 AI센터 Agentic AI 교육용 **TypeSafe Jev 핸즈온**입니다.
-관제실에 들어오는 짧은 보고를 Jev 에게 보여주고, 한 번의 호출로 세 가지를 동시에 물어본 뒤
-**최종 결정은 코드가** 내립니다.
+A **TypeSafe Jev hands-on workshop** for the Air Force AI Center's Agentic AI training.
+Send Jev a short control-room report and ask three questions in a single call.
+**Code applies the final decision rules.**
 
-> 모든 보고 내용은 재미로 만든 가짜 데이터입니다. 실제 공역·부대·규정과 아무 관련이 없습니다.
-> Jev 는 "감" 을 숫자로 줄 뿐, 버튼은 사람이 누릅니다.
+> All reports are fictional examples created for the exercise. They have no connection to actual airspace, military units, or operational regulations.
+> Jev turns an assessment into numbers; a human still presses the button.
 
-## 무엇을 배우나
+## What You Will Learn
 
-| 질문 | 타입 | 돌아오는 값 |
+| Question | Type | Returned Value |
 |---|---|---|
-| 어떻게 할까? | `choice` | 출격 / 지켜보기 / 그냥 두기 + 확신도 |
-| 얼마나 위험해? | `score` | 0~3 단계 (소수로 오니까 반올림) |
-| 정체를 모르겠어? | `noul` | 예일 확률 0~1 |
+| What should we do? | `choice` | Scramble / monitor / ignore, with confidence |
+| How dangerous is it? | `score` | A level from 0 to 3; the returned decimal is rounded |
+| Is the object's identity unknown? | `noul` | Probability of “yes,” from 0 to 1 |
 
-- 질문 세 개를 **한 요청**에 묶어 보낸다. 서로의 답은 모른 채 각자 판단한다.
-- Jev 는 의견만 준다. "출격" 이라고 해도 확신이 낮으면 사람에게 넘기는 **규칙은 코드가 소유**한다.
-- 이 저장소는 TypeSafe 모델 중 **Jev 만** 사용한다 (`jev-latest`, 특정 버전 고정은 `jev-1.13.0`).
+- Bundle all three questions into **one request**. Each is evaluated independently, without seeing the others' answers.
+- Jev provides recommendations only. **Code owns the rules**, including when to defer to a human if a scramble recommendation has low confidence.
+- This repository uses **only Jev** from the TypeSafe model family: `jev-latest`, or `jev-1.13.0` to pin a specific version.
 
-## 실행
+## Getting Started
 
 ```bash
 npm install
-cp .env.example .env   # TYPESAFE_API_KEY 입력
-export $(cat .env)     # 또는 셸에서 직접 export
+cp .env.example .env   # Enter your TYPESAFE_API_KEY
+export $(cat .env)     # Alternatively, export the variable directly in your shell
 npm start
 ```
 
-## 실행 결과 예시
+## Example Output
+
+The output below is translated into English for reference. The application's existing report text and terminal messages remain in Korean.
 
 ```
-📻 보고: 정체불명 비행체가 우리 쪽으로 빠르게 날아오고 있어요. 무전으로 불러도 대답이 없고, 방향도 안 바꿔요!
-   Jev 의견 : scramble (확신 96%)
-   위험도   : 3단계 - 비상! 당장 뭔가 해야 함
-   정체불명?: 30% 그렇다
-   결정     : 🚀 출격 준비! (최종 버튼은 지휘관이)
+📻 Report: An unidentified aircraft is approaching us rapidly. It does not respond to radio calls and is not changing course!
+   Jev recommendation : scramble (96% confidence)
+   Risk level         : 3 — Emergency! Immediate action needed
+   Unidentified?      : 30% probability
+   Decision           : 🚀 Prepare to scramble! The commander makes the final call.
 
-📻 보고: 낮게 천천히 나는 작은 점이 하나 보여요. 새떼인지 드론인지 풍선인지 모르겠어요.
-   Jev 의견 : watch (확신 98%)
-   위험도   : 1단계 - 조금 신경 쓰임
-   정체불명?: 61% 그렇다
-   결정     : 🔍 정체부터 알아보기 (레이더 확대, 무전 재시도)
+📻 Report: A small object is flying low and slowly. We cannot tell whether it is a flock of birds, a drone, or a balloon.
+   Jev recommendation : watch (98% confidence)
+   Risk level         : 1 — Some cause for concern
+   Unidentified?      : 61% probability
+   Decision           : 🔍 Identify it first: zoom in on radar and retry radio contact.
 
-📻 보고: 옆 부대 훈련기예요. 아침에 미리 연락 온 대로 예정된 코스를 잘 날고 있고, 무전도 정상이에요.
-   Jev 의견 : ignore (확신 91%)
-   위험도   : 0단계 - 전혀 안 위험함, 심심한 하루
-   정체불명?: 10% 그렇다
-   결정     : ☕ 커피나 한 잔
+📻 Report: It is a neighboring unit's training aircraft. It is following the route announced this morning, and radio contact is normal.
+   Jev recommendation : ignore (91% confidence)
+   Risk level         : 0 — No danger; a quiet day
+   Unidentified?      : 10% probability
+   Decision           : ☕ Time for a coffee.
 ```
 
-## 실습 아이디어: 질문 한 줄이 결과를 바꾼다
+## Exercise Idea: One Question Can Change the Outcome
 
-처음에는 세 번째 질문을 **"더 알아봐야 해?"** 라고 물었더니, 짧은 보고에는 전부 "예" 가 나와서
-다섯 건 모두 "애매함 → 사람 확인" 으로 빠졌습니다.
-질문을 **"정체를 전혀 모르겠어?"** 로 좁히자 결과가 제대로 갈렸습니다.
+The third question initially asked, **“Do we need to investigate further?”** Every short report received a “yes,” so all five cases fell into the “uncertain → human review” path.
+Narrowing the question to **“Is the object's identity completely unknown?”** produced more differentiated results.
 
-직접 해 보세요.
+Try it yourself:
 
-1. `index.js` 의 `unknown` 질문 문장을 바꿔 본다.
-2. `danger` 의 4단계 설명을 바꿔 본다.
-3. 결정 규칙의 `0.6`, `0.5` 문턱값을 바꿔 본다.
-4. 보고 문장을 하나 추가해서 Jev 가 어떻게 반응하는지 본다.
+1. Change the wording of the `unknown` question in `index.js`.
+2. Change the descriptions of the four `danger` levels.
+3. Adjust the `0.6` and `0.5` thresholds in the decision rules.
+4. Add another report and observe how Jev responds.
 
-## 참고
+## References
 
-- [TypeSafe 문서](https://docs.typesafe.ai/)
+- [TypeSafe Documentation](https://docs.typesafe.ai/)
 - [JavaScript SDK](https://docs.typesafe.ai/sdk/javascript)
-- [Jev 모델](https://docs.typesafe.ai/models)
+- [Jev Models](https://docs.typesafe.ai/models)
